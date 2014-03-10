@@ -1,0 +1,3 @@
+The difference between the final pitch-shifted note of a2 and the non-shifted a3 is audible to human ears. To me, the pitch-shifted note sounds a bit higher than a3. 
+
+The difference between the linear interpolation and no interpolation is quite obvious as well. The wav file with linear interpolation sounds smoother and clearer than the one with no interpolation. It also feels like there are some echoes in the music piece without interpolation. Overall, the wav file with linear interpolation sounds a lot better compared to the one without interpolation.

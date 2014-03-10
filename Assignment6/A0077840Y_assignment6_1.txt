@@ -1,0 +1,1 @@
+There is no obvious difference between the reconstructed and perfect sawtooth wave files. This is probably because the sine waves (that reconstructs the sawtooth waves) with higher frequency have a very low intensity and are not audible to human ears. The main pitch of both files are 1000 Hz.

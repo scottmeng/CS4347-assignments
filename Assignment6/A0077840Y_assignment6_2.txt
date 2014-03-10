@@ -1,0 +1,23 @@
+=== Look up table with no linear interpolation ===
+
+2048 Samples 100 Hz: 
+97.0893379919
+2048 Samples 1234.56 Hz: 
+50.2324508615
+
+16384 Samples 100 Hz: 
+6.10007564909
+16384 Samples 1234.56 Hz: 
+6.28139287027
+
+=== Look up table with linear interpolation ===
+
+2048 Samples 100 Hz: 
+0.0385051435972
+2048 Samples 1234.56 Hz: 
+0.0385514195855
+
+16384 Samples 100 Hz: 
+0.000599063993045
+16384 Samples 1234.56 Hz: 
+0.000602354415353
