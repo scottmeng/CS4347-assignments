@@ -1,6 +1,7 @@
 import math
 import numpy
 import scipy.fftpack
+import pylab as plt
 from scipy.io.wavfile import read
 
 import os
@@ -15,13 +16,10 @@ def apply_pre_emphasis(data):
     copy = 0.95 * numpy.insert(copy, [0.0], 0)
     return data - copy
 
-def db_spectrum(data, window):
+def fft_spectrum(data, window):
     fft = numpy.fft.fft(data * window)
     fft = fft[:len(fft) / 2 + 1]
     magfft = abs(fft) / (numpy.sum(window) / 2.0)
-    #epsilon = pow(10, -10)
-    #db = 20*numpy.log10(magfft + epsilon)
-    #return db
     return magfft
 
 def cal_mel_interval(fs):
@@ -43,71 +41,56 @@ def triangle_window(left, middle, right):
     window = numpy.concatenate((numpy.zeros(left), ascending_half, descending_half))
     if len(window) < 513:
         return numpy.concatenate((window, numpy.zeros(512 - right)))
-    else:
-        return window[0:513]
+    return window[0:513]
+
+def plot_windows(windows, freq_max):
+    freqs = numpy.linspace(0, freq_max, num = 513)
+    plt.figure()
+    for i in range(num_windows):
+        plt.plot(freqs, windows[i])
+    plt.ylabel("Amplitude")
+    plt.xlabel("Frequency (Hz)")
+    plt.title("26 Triangular MFCC filters, 22050 Hz signal, Window size 1024")
+    plt.show()
+
+    plt.figure()
+    for i in range(num_windows):
+        plt.plot(freqs, windows[i], '.-')
+    plt.ylabel("Amplitude")
+    plt.xlabel("Frequency (Hz)")
+    plt.title("26 Triangular MFCC filters, 22050 Hz signal, Window size 1024")
+    plt.xlim(0, 300)
+    plt.show()
+
+def output_arff_title(output_file):
+    output_file.write('@RELATION music_speech\n')
+    for i in range(num_windows):
+        output_file.write('@ATTRIBUTE WIN%d_MEAN NUMERIC\n' % (i))
+    for i in range(num_windows):
+        output_file.write('@ATTRIBUTE WIN%d_STD NUMERIC\n' % (i))
+    output_file.write('@ATTRIBUTE class {music,speech}\n\n')
+    output_file.write('@DATA\n')
+
+def output_arff_data(result, output_file):
+    means = numpy.mean(result, axis = 1)
+    std_dev = numpy.std(result, axis = 1)
+
+    means_string = numpy.char.mod('%f', means)              # generate comma seperated vector output
+    means_string = ",".join(means_string)
+
+    std_dev_string = numpy.char.mod('%f', std_dev)
+    std_dev_string = ",".join(std_dev_string)
+
+    output_file.write("%s,%s,%s\n" % (means_string, std_dev_string, label))
 
 input_file = open(input_dir)                                # read from ground truth file
 output_file = open(output_dir, 'w')                         # write into output ARFF file
-output_file.write('@RELATION music_speech\n')
-output_file.write('@ATTRIBUTE WIN1_MEAN NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN2_MEAN NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN3_MEAN NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN4_MEAN NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN5_MEAN NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN6_MEAN NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN7_MEAN NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN8_MEAN NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN9_MEAN NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN10_MEAN NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN11_MEAN NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN12_MEAN NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN13_MEAN NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN14_MEAN NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN15_MEAN NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN16_MEAN NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN17_MEAN NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN18_MEAN NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN19_MEAN NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN20_MEAN NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN21_MEAN NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN22_MEAN NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN23_MEAN NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN24_MEAN NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN25_MEAN NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN26_MEAN NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN1_STD NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN2_STD NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN3_STD NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN4_STD NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN5_STD NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN6_STD NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN7_STD NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN8_STD NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN9_STD NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN10_STD NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN11_STD NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN12_STD NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN13_STD NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN14_STD NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN15_STD NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN16_STD NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN17_STD NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN18_STD NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN19_STD NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN20_STD NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN21_STD NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN22_STD NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN23_STD NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN24_STD NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN25_STD NUMERIC\n')
-output_file.write('@ATTRIBUTE WIN26_STD NUMERIC\n')
-output_file.write('@ATTRIBUTE class {music,speech}\n\n')
-output_file.write('@DATA\n')
+output_arff_title(output_file)
 
 file_names = input_file.readlines()
 
 for file_name in file_names:
-    music_dir = file_name.split()[0]                     # extract music and speech file directory
+    music_dir = file_name.split()[0]                        # extract music and speech file directory
     label = file_name.split()[1]
     samp_rate, data = read(music_dir)
 
@@ -118,34 +101,25 @@ for file_name in file_names:
     for i in range(num_windows):
         windows[i] = triangle_window(reverse_mel(i * mel_interval) / bin_val, reverse_mel((i + 1) * mel_interval) / bin_val, reverse_mel((i + 2) * mel_interval) / bin_val)
 
-    data = data / 32768.                                 # normalize wav file data
+    data = data / 32768.                                    # normalize wav file data
     data = apply_pre_emphasis(data)
 
-    num_buffers = len(data) / 512 - 1                    # calculate the number of buffer slices
-    buffers = numpy.zeros((513, num_buffers))           # create matrix to store buffer data
+    num_buffers = len(data) / 512 - 1                       # calculate the number of buffer slices
+    buffers = numpy.zeros((513, num_buffers))               # create matrix to store buffer data
         
-    for i in range(num_buffers):                         # put buffer slices in matrix
+    for i in range(num_buffers):                            # put buffer slices in matrix
         start = int(i * 512)
         end = int(i * 512 + 1024)
-        buffer_data = data[start:end]
+        buffers[:,i] = fft_spectrum(data[start:end], numpy.hamming(1024))
 
-        buffers[:,i] = db_spectrum(buffer_data, numpy.hamming(1024))
+    result = numpy.dot(windows, buffers)                    # apply 26 windows in one go
+    result = numpy.log10(result)                            # apply base 10 log
+    result = scipy.fftpack.dct(result)                      # apply dct
 
-    result = numpy.dot(windows, buffers)
-    result = numpy.log10(result)
-    result = scipy.fftpack.dct(result)
-
-    means = numpy.mean(result, axis = 1)
-    std_dev = numpy.std(result, axis = 1)
-
-    means_string = numpy.char.mod('%f', means)             # generate comma seperated vector output
-    means_string = ",".join(means_string)
-
-    std_dev_string = numpy.char.mod('%f', std_dev)
-    std_dev_string = ",".join(std_dev_string)
-
-    output_file.write("%s,%s,%s\n" % (means_string, std_dev_string, label))
+    output_arff_data(result, output_file)
 
     print "*"  
+
+plot_windows(windows, samp_rate / 2.0)
 
 output_file.close()      
