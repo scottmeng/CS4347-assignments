@@ -1,0 +1,124 @@
+============================ Classifiers Under Test =============================
+
+In this exercise, three different classification algorithms were chosen:
+
+	J48 (C4.5-based binary decision tree)
+
+	NaiveBayer (Bayer's theorem based probablistic classifier)
+
+	SMO (support-vector-machine based classifier) with normalized polynomial kernel (its exponent being 3)
+
+
+================= Best Classifier and Its Performance Advantage =================
+
+The classifier with best performance is SMO (with 3-exponential kernel function). The F-measure (97.656%) is slightly higher than that of tree-based J48 (93.75%) and NaiveBayers (88.28%). Specifically, SMO shows an extraordinarily high speech TP rate of 98.4%, which is far beyond that of J48 and NaiveBayers.
+
+However, considering the complexity of these classifier models, J48 is the most justified classifier to go for. It delivers reasonably accurate prediction results with simple models.
+
+
+========================== Detailed Performance Measure =========================
+
+J48:
+
+	=== Classifier model (full training set) ===
+
+	J48 pruned tree
+	------------------
+
+	WIN5_STD <= 2.295523
+	|   WIN25_STD <= 0.487234
+	|   |   WIN3_MEAN <= -1.363597: speech (6.0)
+	|   |   WIN3_MEAN > -1.363597: music (4.0)
+	|   WIN25_STD > 0.487234: music (57.0)
+	WIN5_STD > 2.295523
+	|   WIN13_MEAN <= 1.046299: speech (57.0)
+	|   WIN13_MEAN > 1.046299: music (4.0/1.0)
+
+	Number of Leaves  : 	5
+
+	Size of the tree : 	9
+
+
+	Time taken to build model: 0.04 seconds
+
+	=== Stratified cross-validation ===
+	=== Summary ===
+
+	Correctly Classified Instances         120               93.75   %
+	Incorrectly Classified Instances         8                6.25   %
+	Kappa statistic                          0.875 
+	Mean absolute error                      0.0665
+	Root mean squared error                  0.2437
+	Relative absolute error                 13.2958 %
+	Root relative squared error             48.7038 %
+	Total Number of Instances              128     
+
+	=== Detailed Accuracy By Class ===
+
+	               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+	                 0.938     0.063      0.938     0.938     0.938      0.953    music
+	                 0.938     0.063      0.938     0.938     0.938      0.953    speech
+	Weighted Avg.    0.938     0.063      0.938     0.938     0.938      0.953
+
+	=== Confusion Matrix ===
+
+	  a  b   <-- classified as
+	 60  4 |  a = music
+	  4 60 |  b = speech
+
+
+
+
+
+NaiveBayers:
+
+	=== Summary ===
+
+	Correctly Classified Instances         113               88.2813 %
+	Incorrectly Classified Instances        15               11.7188 %
+	Kappa statistic                          0.7656
+	Mean absolute error                      0.1121
+	Root mean squared error                  0.3277
+	Relative absolute error                 22.4176 %
+	Root relative squared error             65.5007 %
+	Total Number of Instances              128     
+
+	=== Detailed Accuracy By Class ===
+
+	               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+	                 0.938     0.172      0.845     0.938     0.889      0.973    music
+	                 0.828     0.063      0.93      0.828     0.876      0.973    speech
+	Weighted Avg.    0.883     0.117      0.887     0.883     0.882      0.973
+
+	=== Confusion Matrix ===
+
+	  a  b   <-- classified as
+	 60  4 |  a = music
+	 11 53 |  b = speech
+
+
+SMO:
+
+	=== Summary ===
+
+	Correctly Classified Instances         125               97.6563 %
+	Incorrectly Classified Instances         3                2.3438 %
+	Kappa statistic                          0.9531
+	Mean absolute error                      0.0234
+	Root mean squared error                  0.1531
+	Relative absolute error                  4.685  %
+	Root relative squared error             30.6014 %
+	Total Number of Instances              128     
+
+	=== Detailed Accuracy By Class ===
+
+	               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+	                 0.969     0.016      0.984     0.969     0.976      0.977    music
+	                 0.984     0.031      0.969     0.984     0.977      0.977    speech
+	Weighted Avg.    0.977     0.023      0.977     0.977     0.977      0.977
+
+	=== Confusion Matrix ===
+
+	  a  b   <-- classified as
+	 62  2 |  a = music
+	  1 63 |  b = speech
