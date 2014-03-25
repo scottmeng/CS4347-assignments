@@ -11,7 +11,7 @@ lower_bound = 200
 upper_bound = 3000
 
 input_dir = "original.wav"
-output_dir = "reconstructed_part3.wav"
+output_dir = "reconstructed_part4.wav"
 
 def time_to_freq(data, window, bins_to_freq):
     lower_index = int(lower_bound / bins_to_freq)
@@ -20,6 +20,9 @@ def time_to_freq(data, window, bins_to_freq):
     fft[0: lower_index] = numpy.zeros(lower_index)
     fft[upper_index: 512 - upper_index] = numpy.zeros(512 - 2 * upper_index)
     fft[512 - lower_index: 512] = numpy.zeros(lower_index)
+    fft.real = numpy.array(fft.real * 32767, dtype = numpy.int16)
+    fft.imag = numpy.array(fft.imag * 32767, dtype = numpy.int16)
+
     return fft
 
 def sine_window(length):
@@ -44,7 +47,7 @@ for i in range(num_buffers):
     freq_buffer = time_to_freq(data[start: end], sine_window(512), bins_to_freq)
     reconstructed[start: end] += freq_to_time(freq_buffer, sine_window(512))
 
-reconstructed = numpy.array(reconstructed * 32768, dtype = numpy.int16)       # convert data into 16-bit integer
+reconstructed = numpy.array(reconstructed, dtype = numpy.int16)       # convert data into 16-bit integer
 
 write(output_dir, sample_freq, reconstructed)
 
