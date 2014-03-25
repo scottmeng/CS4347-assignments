@@ -8,14 +8,8 @@ import os
 os.getcwd()                                              # get the directory of current process
 
 input_dir = "clear_d1.wav"
-analysis_dir = "analysis.txt"
-output_dir = "constructed.wav"
-
-FS = 22050
-
-def sine_wave(freq, duration = 1.0, amplitude = 1.0, phase = 0.0):
-    t = numpy.arange(int(duration * FS))
-    return amplitude * numpy.sin(t * (freq / FS) * (2 * numpy.pi) + phase)
+txt_dir = "sines.txt"
+output_dir = "reconstructed.wav"
 
 def db_spectrum(data, window):
     fft = numpy.fft.fft(data * window)
@@ -42,6 +36,8 @@ def show_spectrogram(data, title):
 
     plt.imshow(buffers, origin='lower', aspect='auto')
     plt.title(title)
+    plt.xlabel("Time (buffer index)")
+    plt.ylabel("Frequency (bin)")
     plt.show()
     return
 
@@ -61,27 +57,27 @@ for i in range(num_buffers):
 analysis[0] = numpy.argmax(buffers, axis = 0) * bins_to_freq        # frequency array
 analysis[1] = numpy.amax(buffers, axis = 0)                         # amplitude array
 
-numpy.savetxt(analysis_dir, numpy.transpose(analysis))
+numpy.savetxt(txt_dir, numpy.transpose(analysis), fmt="%.1f", delimiter="\t")
 
-construction_params = numpy.zeros((3, num_buffers * 128))
+construction_params = numpy.zeros((3, num_buffers * 128))           # parameters for reconstructing audio
 phase_correction = numpy.zeros(num_buffers)
 
 amplitudes = reverse_db(analysis[1])
 
 for i in range(1, num_buffers):
-    phase_correction[i] = analysis[0, i-1] * (i * 128 - 1) / FS * 2 * numpy.pi + phase_correction[i-1]
+    phase_correction[i] = analysis[0, i-1] * (i * 128 - 1) / sample_freq * 2 * numpy.pi + phase_correction[i-1]
 
 for i in range(num_buffers):
     start = 128 * i
     end  = start + 128
-    construction_params[0, start:end] = analysis[0, i]
-    construction_params[1, start:end] = amplitudes[i]
-    construction_params[2, start:end] = phase_correction[i]
+    construction_params[0, start:end] = analysis[0, i]              # frequency parameters
+    construction_params[1, start:end] = amplitudes[i]               # amplitude parameters
+    construction_params[2, start:end] = phase_correction[i]         # phase correction parameters
 
-t = numpy.arange(int(num_buffers * 128))
-constructed = construction_params[1] * numpy.sin(t * (construction_params[0] / FS) * (2 * numpy.pi) + construction_params[2])
+t = numpy.arange(int(num_buffers * 128))                            # reconstructing audio using one single sine wave
+constructed = construction_params[1] * numpy.sin(t * (construction_params[0] / sample_freq) * (2 * numpy.pi) + construction_params[2])
 
-write(output_dir, FS, constructed)
+write(output_dir, sample_freq, constructed)
 
 show_spectrogram(data, "original")
 show_spectrogram(constructed, "constructed")
