@@ -1,0 +1,3 @@
+frequency range:
+
+300Hz - 1000Hz

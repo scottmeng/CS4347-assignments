@@ -1,0 +1,7 @@
+frequency range:
+
+200Hz to 1200Hz
+
+bit depth:
+
+4 bits
