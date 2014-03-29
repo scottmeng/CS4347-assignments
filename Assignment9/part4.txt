@@ -4,4 +4,4 @@ frequency range:
 
 bit depth:
 
-4 bits
+8 bits

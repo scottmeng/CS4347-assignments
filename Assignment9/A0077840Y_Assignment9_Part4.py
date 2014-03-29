@@ -9,7 +9,7 @@ os.getcwd()                                             # get the directory of c
 
 lower_bound = 200                                       # configuration parameters
 upper_bound = 1200
-quan_bits = 4
+quan_bits = 8
 
 input_dir = "original.wav"
 output_dir = "reconstructed_part4.wav"
@@ -19,29 +19,23 @@ max_abs = 0;                                            # get the maximum absolu
 
 def time_to_freq(data, window, bins_to_freq, quantization):
     global max_abs
-    lower_index = int(lower_bound / bins_to_freq)
+    lower_index = int(lower_bound / bins_to_freq)       # compute index range from frequency range
     upper_index = int(upper_bound / bins_to_freq)
     fft = numpy.fft.fft(data * window)
     fft[0: lower_index] = numpy.zeros(lower_index)
     fft[upper_index: 512 - upper_index] = numpy.zeros(512 - 2 * upper_index)
     fft[512 - lower_index: 512] = numpy.zeros(lower_index)
 
-    if quantization == False:
+    if quantization == False:                           # get maximum
         if max(abs(fft.imag)) > max_abs:
             max_abs = max(abs(fft.imag))
         if max(abs(fft.real)) > max_abs:
             max_abs = max(abs(fft.real))
-    else:   
-        #print fft.real                                            # perform quantization
-        real_parts = numpy.array(fft.real / max_abs * (2 ** quan_bits), dtype = numpy.int32)
-        fft.real = real_parts / float(2 ** quan_bits) * max_abs
-        imag_parts = numpy.array(fft.imag / max_abs * (2 ** quan_bits), dtype = numpy.int32)
-        fft.imag = imag_parts / float(2 ** quan_bits) * max_abs
-        #print max_abs
-        #print real_parts
-        #print fft.real
-        #print imag_parts
-        #exit(0)
+    else:                                               # perform quantization
+        real_parts = numpy.array(fft.real / max_abs * (2 ** (quan_bits - 1)), dtype = numpy.int32)
+        fft.real = real_parts / float(2 ** (quan_bits - 1)) * max_abs
+        imag_parts = numpy.array(fft.imag / max_abs * (2 ** (quan_bits - 1)), dtype = numpy.int32)
+        fft.imag = imag_parts / float(2 ** (quan_bits - 1)) * max_abs
     return fft
 
 def sine_window(length):
