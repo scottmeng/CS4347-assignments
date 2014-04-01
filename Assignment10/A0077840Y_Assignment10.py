@@ -53,27 +53,38 @@ def output_arff_title(output_file):
     output_file.write('@ATTRIBUTE class {music,speech}\n\n')
     output_file.write('@DATA\n')
 
-def output_arff_data(result, output_file):
+def output_arff_data(data, output_file):
+    print len(labels)
+    for i in range(data.shape[0]):
+        data_strings = numpy.char.mod('%f', data[i, :])
+        data_strings = ",".join(data_strings)
+        print i
+        output_file.write("%s,%s\n" % (data_strings, labels[i]))
+
+def normalize_data(data):
+    for i in range(data.shape[0]):
+        data[i, :] = (data[i, :] - numpy.min(data[i, :])) / (numpy.max(data[i, :]) - numpy.min(data[i, :]))
+    return data
+
+def get_mean_and_std(data):
     means = numpy.mean(result, axis = 1)
-    std_dev = numpy.std(result, axis = 1)
-
-    means_string = numpy.char.mod('%f', means)              # generate comma seperated vector output
-    means_string = ",".join(means_string)
-
-    std_dev_string = numpy.char.mod('%f', std_dev)
-    std_dev_string = ",".join(std_dev_string)
-
-    output_file.write("%s,%s,%s\n" % (means_string, std_dev_string, label))
+    std_devs = numpy.std(result, axis = 1)
+    mean_and_std = numpy.concatenate((means, std_devs))
+    return mean_and_std
 
 input_file = open(input_dir)                                # read from ground truth file
-output_file = open(output_dir, 'w')                         # write into output ARFF file
-output_arff_title(output_file)
+output_file_regular = open(output_dir_regular, 'w')         # write into output ARFF file
+output_file_normalized = open(output_dir_normalized, 'w')
+output_arff_title(output_file_regular)
+output_arff_title(output_file_normalized)
 
 file_names = input_file.readlines()
+arff_results = numpy.empty((len(file_names), num_windows * 2))
+labels = list()                                                 # list to store all the labels
 
-for file_name in file_names:
-    music_dir = file_name.split()[0]                        # extract music and speech file directory
-    label = file_name.split()[1]
+for j in range(len(file_names)):
+    music_dir, label = file_names[j].split()                    # extract music and speech file directory
+    labels.append(label)
     samp_rate, data = read("../" + music_dir)
 
     mel_interval = cal_mel_interval(samp_rate)
@@ -99,8 +110,12 @@ for file_name in file_names:
 
     result = scipy.fftpack.dct(result, axis = 0)            # apply dct across 26 MFCC values
 
-    output_arff_data(result, output_file)
+    arff_results[j] = get_mean_and_std(result)
+    print "*"
 
-    print "*"  
+output_arff_data(arff_results, output_file_regular)
+arff_results_normalized = normalize_data(arff_results)
+output_arff_data(arff_results_normalized, output_file_normalized)
 
-output_file.close()      
+output_file_regular.close()
+output_file_normalized.close()      
