@@ -54,16 +54,14 @@ def output_arff_title(output_file):
     output_file.write('@DATA\n')
 
 def output_arff_data(data, output_file):
-    print len(labels)
     for i in range(data.shape[0]):
         data_strings = numpy.char.mod('%f', data[i, :])
         data_strings = ",".join(data_strings)
-        print i
         output_file.write("%s,%s\n" % (data_strings, labels[i]))
 
 def normalize_data(data):
-    for i in range(data.shape[0]):
-        data[i, :] = (data[i, :] - numpy.min(data[i, :])) / (numpy.max(data[i, :]) - numpy.min(data[i, :]))
+    for i in range(data.shape[1]):
+        data[:, i] = (data[:, i] - numpy.min(data[:, i])) / (numpy.max(data[:, i]) - numpy.min(data[:, i]))
     return data
 
 def get_mean_and_std(data):
