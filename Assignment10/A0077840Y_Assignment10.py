@@ -70,13 +70,19 @@ def get_mean_and_std(data):
     mean_and_std = numpy.concatenate((means, std_devs))
     return mean_and_std
 
-input_file = open(input_dir)                                # read from ground truth file
-output_file_regular = open(output_dir_regular, 'w')         # write into output ARFF file
+def get_window(num_windows):
+    windows = numpy.zeros((num_windows, 513))
+    for i in range(num_windows):
+        windows[i] = triangle_window(reverse_mel(i * mel_interval) / bin_val, reverse_mel((i + 1) * mel_interval) / bin_val, reverse_mel((i + 2) * mel_interval) / bin_val)
+    return windows
+
+input_file = open(input_dir)                                    # read from ground truth file
+output_file_regular = open(output_dir_regular, 'w')             # write into output ARFF file
 output_file_normalized = open(output_dir_normalized, 'w')
-output_arff_title(output_file_regular)
+output_arff_title(output_file_regular)                          # output titles to ARFF files
 output_arff_title(output_file_normalized)
 
-file_names = input_file.readlines()
+file_names = input_file.readlines()                             # read in all file names
 arff_results = numpy.empty((len(file_names), num_windows * 2))
 labels = list()                                                 # list to store all the labels
 
@@ -88,25 +94,21 @@ for j in range(len(file_names)):
     mel_interval = cal_mel_interval(samp_rate)
     bin_val = samp_rate / 1024.0
 
-    windows = numpy.zeros((num_windows, 513))
-    for i in range(num_windows):
-        windows[i] = triangle_window(reverse_mel(i * mel_interval) / bin_val, reverse_mel((i + 1) * mel_interval) / bin_val, reverse_mel((i + 2) * mel_interval) / bin_val)
+    windows = get_window(num_windows)
 
-    data = data / 32768.                                    # normalize wav file data
-    data = apply_pre_emphasis(data)
+    data = apply_pre_emphasis(data / 32768.)                    # normalize wav file data
 
-    num_buffers = len(data) / 512 - 1                       # calculate the number of buffer slices
-    buffers = numpy.zeros((513, num_buffers))               # create matrix to store buffer data
+    num_buffers = len(data) / 512 - 1                           # calculate the number of buffer slices
+    buffers = numpy.zeros((513, num_buffers))                   # create matrix to store buffer data
         
-    for i in range(num_buffers):                            # put buffer slices in matrix
-        start = int(i * 512)
-        end = int(i * 512 + 1024)
+    for i in range(num_buffers):                                # put buffer slices in matrix
+        start = i * 512
+        end = start + 1024
         buffers[:,i] = fft_spectrum(data[start:end], numpy.hamming(1024))
 
-    result = numpy.dot(windows, buffers)                    # apply 26 windows in one go
-    result = numpy.log10(result)                            # apply base 10 log
-
-    result = scipy.fftpack.dct(result, axis = 0)            # apply dct across 26 MFCC values
+    result = numpy.dot(windows, buffers)                        # apply 26 windows in one go
+    result = numpy.log10(result)                                # apply base 10 log
+    result = scipy.fftpack.dct(result, axis = 0)                # apply dct across 26 MFCC values
 
     arff_results[j] = get_mean_and_std(result)
     print "*"
