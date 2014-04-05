@@ -1,0 +1,18 @@
+Overview:
+
+In this program, a music and speech classifier is implemented. It uses a set of perceptual features(52 features in total, covering the mean and standard deviation of 26 MFCC values) and a decision tree-based J48 classifier model.
+
+
+Question 2:
+
+No, I am not getting the same accuracy. Rather, the accuracy is higher than that of Weka.
+
+When classifying the original music and speech data set, the accuracy is 99.22%. This is slightly higher than that produced by Weka on 10-folds validation. The reason is probably because in 10-folds validation, 90% of the training data is used to train the system, while the rest 10% is used for testing, therefore, the produced classifier model fits the 90% training data better than the testing data. However, since the python implementation uses classifier parameter trained using the entire data set, the classifier model is overtrained to perfectly fit the training set, which happens to be the entire data set in this case. Therefore, when testing using the same complete data set, the accuracy is significantly higher than 10-fold validation.
+
+
+Question 3:
+
+The accuracy is 100%, which is much higher than expected. 
+
+The trained parameter for the new data set is much simpler than that for the original music-speech dataset. This is probably because the training set is significantly smaller so that to fully train the classifier, it requires fewer parameters.
+

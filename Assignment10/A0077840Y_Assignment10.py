@@ -9,8 +9,8 @@ os.getcwd()                                              # get the directory of 
 
 input_dir = "../music_speech.mf"
 new_input_dir = "../expanded-music-speech.mf"
-output_dir_regular = "Assignment10_regular_new.arff"
-output_dir_normalized = "Assignment10_normalized_new.arff"
+output_dir_regular = "Assignment10_regular_expanded.arff"
+output_dir_normalized = "Assignment10_normalized_expanded.arff"
 num_windows = 26
 
 def apply_pre_emphasis(data):
@@ -92,7 +92,7 @@ def J48_classifier(data):
         else:
             return "music"
 
-input_file = open(input_dir)                                    # read from ground truth file
+input_file = open(new_input_dir)                                    # read from ground truth file
 output_file_regular = open(output_dir_regular, 'w')             # write into output ARFF file
 output_file_normalized = open(output_dir_normalized, 'w')
 output_arff_title(output_file_regular)                          # output titles to ARFF files
@@ -137,11 +137,12 @@ output_file_normalized.close()
 
 
 # start of classifying process
+
 data_file = open(output_dir_normalized)
 arff_entries = data_file.readlines()
-start = False
-num_correct_entries = 0
-num_entries = 0
+start = False                                                   # indicate the start of data section
+num_correct_entries = 0                                         # number of correctly classified entries
+num_entries = 0                                                 # number of all entries
 
 for arff_entry in arff_entries:
     if start:
